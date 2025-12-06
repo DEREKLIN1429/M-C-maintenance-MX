@@ -20,6 +20,7 @@
             display: flex; justify-content: center; height: 100vh;
         }
 
+        /* 登入畫面樣式已移除或保留不使用 */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); z-index: 9999;
@@ -297,15 +298,6 @@
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-box">
-            <h3>🔒 Login (登入)</h3>
-            <p style="color:#666; font-size:0.9em;">Please enter password<br>(請輸入密碼)</p>
-            <input type="password" id="loginPass" class="login-input" placeholder="Password">
-            <button class="btn-main btn-save" style="aspect-ratio: auto; padding:15px; flex-direction:row;" onclick="checkLogin()">Login (進入)</button>
-        </div>
-    </div>
-
     <div id="status-modal">
         <div class="status-box">
             <div id="status-spinner" class="spinner"></div>
@@ -320,7 +312,7 @@
         <div class="author-header">Author: DERER LIN</div>
 
         <div class="header">
-            <div class="header-btn" onclick="logout()" title="Lock / Logout (鎖定/登出)">🔒</div>
+            <div style="width: 40px;"></div>
             <div class="header-title">
                 <h2>M/C-maintenance MX<br>混練設備查核保養</h2>
             </div>
@@ -403,11 +395,6 @@
                 <button onclick="closeSettings()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
             </div>
             
-            <div class="modal-group" style="background: #f9f9f9; padding: 10px; border-radius: 8px; border: 1px dashed #ccc;">
-                <label style="color:#d63384;">🔑 Login Password (修改登入密碼)</label>
-                <input type="text" id="set-password" class="modal-input" placeholder="Current: 1234">
-            </div>
-
             <div class="modal-group">
                 <label>1. Voice Timeout (錄音總秒數)</label>
                 <input type="number" id="set-timeout" class="modal-input" value="10">
@@ -450,7 +437,6 @@
 
 <script>
     // ================= 初始化 =================
-    const DEFAULT_PASS = "1234"; 
     
     // --- 固定路徑 ---
     const FIXED_SCRIPT_ID = "AKfycbwxqLEbjVZtypjr49zfnbDU7DM6aBkhnuAItczMdrMnpxYfV9AreXCuysjrp2q1VgmJHQ/exec";
@@ -463,22 +449,15 @@
     // 錄音狀態
     let isRecording = false; 
     let isManualStop = false; 
-    let voiceTimer = null;            
-    let countdownInterval = null;     
+    let voiceTimer = null;             
+    let countdownInterval = null;      
     let punctuationTimer = null; 
     let timeLeft = 0; 
     let snapshotText = ""; 
 
     window.onload = function() {
-        if(!localStorage.getItem("app_password")) {
-            localStorage.setItem("app_password", DEFAULT_PASS);
-        }
-        const isLoggedIn = localStorage.getItem("isLoggedIn");
-        if(isLoggedIn === "true") {
-            showApp();
-        } else {
-            document.getElementById('login-screen').style.display = 'flex';
-        }
+        // 直接顯示 App，不檢查密碼
+        showApp();
         loadSettingsToUI();
         
         // 載入上次輸入的工號
@@ -488,29 +467,11 @@
         }
     };
 
-    function checkLogin() {
-        const input = document.getElementById('loginPass').value;
-        const storedPass = localStorage.getItem("app_password");
-        if(input === storedPass) {
-            localStorage.setItem("isLoggedIn", "true");
-            showApp();
-        } else {
-            alert("Wrong Password! (密碼錯誤)");
-        }
-    }
-
-    function logout() {
-        if(confirm("Lock and logout?\n(確定要鎖定並登出嗎？)")) {
-            localStorage.removeItem("isLoggedIn"); 
-            document.getElementById('app-screen').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'flex'; 
-            document.getElementById('loginPass').value = ""; 
-            closeSettings();
-        }
-    }
-
     function showApp() {
-        document.getElementById('login-screen').style.display = 'none';
+        // 確保登入畫面隱藏，主畫面顯示
+        if(document.getElementById('login-screen')) {
+             document.getElementById('login-screen').style.display = 'none';
+        }
         document.getElementById('app-screen').style.display = 'block';
         applySettings(); 
     }
@@ -537,15 +498,12 @@
     }
 
     function saveSettings() {
-        const newPass = document.getElementById('set-password').value;
+        // 移除密碼儲存邏輯
         const timeout = document.getElementById('set-timeout').value;
         const warning = document.getElementById('set-warning').value;
         const lang = document.getElementById('set-lang').value; 
         const ratio = document.getElementById('set-ratio').value;
 
-        if(newPass.trim() === "") { alert("Password cannot be empty!"); return; }
-
-        localStorage.setItem("app_password", newPass); 
         localStorage.setItem("cfg_timeout", timeout);
         localStorage.setItem("cfg_warning", warning);
         localStorage.setItem("cfg_lang", lang);
@@ -559,7 +517,7 @@
     }
 
     function loadSettingsToUI() {
-        document.getElementById('set-password').value = localStorage.getItem("app_password");
+        // 移除密碼讀取邏輯
         document.getElementById('set-timeout').value = localStorage.getItem("cfg_timeout") || "10";
         document.getElementById('set-warning').value = localStorage.getItem("cfg_warning") || "3";
         const savedLang = localStorage.getItem("cfg_lang") || "cmn-Hant-TW";
@@ -745,7 +703,7 @@
                     const marks = ["，", "。", ",", "."];
                     if(!marks.includes(lastChar)) {
                         const lang = document.getElementById('main-lang').value;
-                        const mark = lang.includes('en') ? ", " : "，";
+                        const mark = lang.includes('en') ? ", " : "，"; 
                         currentVal += mark;
                         document.getElementById('noteInput').value = currentVal;
                     }
